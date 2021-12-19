@@ -31,6 +31,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
     maven { url = uri("https://maven.scijava.org/content/groups/public") }
     mavenLocal()
 }
@@ -40,7 +41,7 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     // ntakt
-    api("org.ntakt:ntakt-core:0.1.0-SNAPSHOT")
+    api("org.ntakt:ntakt-core:b2b0062fe8")
 
     // imglib2
     api("net.imglib2:imglib2:5.10.0")
