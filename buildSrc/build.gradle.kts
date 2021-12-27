@@ -22,4 +22,5 @@ dependencies {
 
     // code generation
     implementation("com.squareup:kotlinpoet:1.6.0")
+    implementation("com.squareup:javapoet:1.13.0")
 }

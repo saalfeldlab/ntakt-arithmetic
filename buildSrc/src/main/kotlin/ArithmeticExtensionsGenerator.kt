@@ -25,6 +25,10 @@ private val arithmeticTypeCombinations = mutableListOf<Triple<KClass<*>, KClass<
     }
 }
 
+private val arithmeticTypeCombinationsMap = arithmeticTypeCombinations
+    .flatMap { listOf((it.first to it.second) to it.third, (it.second to it.first) to it.third) }
+    .toMap()
+
 
 
 fun generateArithmeticExtensions(`as`: String, fileName: String, operator: arithmetics.OperatorName): String {
@@ -37,10 +41,6 @@ fun generateArithmeticExtensions(`as`: String, fileName: String, operator: arith
     val (name, operatorName, type) = operator
     var index = 0
     kotlinFile.addFunction(generatePlusSameGenericTypes(name = name, operator = operatorName, container = container, t = type, jvmName = "${name}_${++index}"))
-    for ((t1, t2, o) in arithmeticTypeCombinations) {
-        kotlinFile.addFunction(generatePlusConverting(name, operatorName, container, t1, t2, o, jvmName = "${name}_${++index}"))
-        kotlinFile.addFunction(generatePlusConverting(name, operatorName, container, t2, t1, o, jvmName = "${name}_${++index}"))
-    }
     kotlinFile.addFunction(generateArithmeticOperatorStarProjection(name, operatorName, container, jvmName = "${name}_${++index}"))
     return StringBuilder().also { sb -> kotlinFile.build().writeTo(sb) }.toString()
 }
@@ -70,48 +70,6 @@ private fun generatePlusSameGenericTypes(name: String, operator: String, contain
             .build()
 }
 
-private fun generatePlusConverting(
-        name: String,
-        operator: String,
-        container: KClass<*>,
-        t1: KClass<*>,
-        t2: KClass<*>,
-        o: KClass<*>,
-        jvmName: String): FunSpec {
-    return generatePlusConverting(name, operator, container.asTypeName(), t1, t2, o, jvmName)
-}
-
-private fun generatePlusConverting(
-        name: String,
-        operator: String,
-        container: ClassName,
-        t1: KClass<*>,
-        t2: KClass<*>,
-        o: KClass<*>,
-        jvmName: String): FunSpec {
-    return generatePlusConverting(name, operator, container, t1.asTypeName(), t2.asTypeName(), o.asTypeName(), jvmName)
-}
-
-private fun generatePlusConverting(
-        name: String,
-        operator: String,
-        container: ClassName,
-        t1: ClassName,
-        t2: ClassName,
-        o: ClassName,
-        jvmName: String): FunSpec {
-    return FunSpec
-            .builder(name)
-            .addAnnotation(AnnotationSpec.builder(JvmName::class).addMember("name = %S", jvmName).build())
-            .addModifiers(KModifier.OPERATOR)
-            .receiver(container.parameterizedBy(t1))
-            .addParameter("that", container.parameterizedBy(t2))
-            .returns(container.parameterizedBy(o))
-            // Need · to add non-breaking space
-            .addStatement("return this.asType(${o.simpleName}())·$operator·that.asType(${o.simpleName}())")
-            .build()
-}
-
 private fun generateArithmeticOperatorStarProjection(name: String, operator: String, container: ClassName, jvmName: String): FunSpec {
     val rt = RealType::class.asTypeName().parameterizedBy(STAR)
     val crt = container.parameterizedBy(rt)
@@ -120,8 +78,17 @@ private fun generateArithmeticOperatorStarProjection(name: String, operator: Str
             .add("return when {\n")
             .also { cb ->
                 for (t1 in arithmeticTypes.map { it.first })
-                    for (t2 in arithmeticTypes.map { it.first })
-                        cb.add("····this.type·is·%T·&&·that.type·is·%T·->·(this.asType(%T())·$operator·that.asType(%T()))·as·%T\n", t1, t2, t1.asTypeName(), t2.asTypeName(), crt)
+                    for (t2 in arithmeticTypes.map { it.first }) {
+                        val o = arithmeticTypeCombinationsMap[t1 to t2] ?: run { require(t1 == t2); t1 }
+                        cb.add(
+                            "····this.type·is·%T·&&·that.type·is·%T·->·(this.asType(%T())·$operator·that.asType(%T()))·as·%T\n",
+                            t1,
+                            t2,
+                            o,
+                            o,
+                            crt
+                        )
+                    }
             }
             .add("····else·->·error(\"Arithmetic·operator·$operator·($name)·not·supported·for·combination·of·types·${'$'}{this.type::class}·and·${'$'}{that.type::class}.·Use·any·pairwise·combination·of·${'$'}{types.realTypes.map·{·it::class·}}.\")\n")
             .add("}\n\n")
