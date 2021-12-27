@@ -50,6 +50,15 @@ val primitiveTypes = arrayOf(
 )
 
 val outputDir = File("src/main/kotlin")
+val outputDirJava = File("src/main/java")
+
+val containersClasses = mapOf(
+    "RA" to RandomAccessible::class,
+    "RAI" to RandomAccessibleInterval::class,
+    "RRA" to RealRandomAccessible::class,
+    "RRARI" to RealRandomAccessibleRealInterval::class
+//        "II" to IterableInterval::class.asTypeName())
+)
 
 val containers = mapOf(
         "RA" to RandomAccessible::class.asTypeName(),
@@ -72,6 +81,9 @@ val abbreviationToExtensionTypeMapping = extensionTypes.associateBy({ it.filter 
 fun getTypeFileMapping(extensionIdentifier: String) = abbreviationToExtensionTypeMapping
         .mapValues { "${it.value}${extensionIdentifier}Extensions" }
         .mapValues { (it.value to outputDir.resolve("${it.value}.kt")) }
+
+fun getTypeClassMappingJava(extensionIdentifier: String) = abbreviationToExtensionTypeMapping
+    .mapValues { "${it.value}${extensionIdentifier}Extensions" }
 
 object arithmetics {
     data class OperatorName(val name: String, val operatorName: String, val type: KClass<*>)

@@ -75,6 +75,10 @@ open class ExtensionsTask(extensionsIdentifier: String) : AbstractTask() {
     fun getFileRA() = typeFileMapping["RA"]?.second
     @OutputFile
     fun getFileRAI() = typeFileMapping["RAI"]?.second
+    @OutputFile
+    fun getJavaFileRA() = getFilePathFor("${typeFileMapping["RA"]?.first}Java")
+    @OutputFile
+    fun getJavaFileRAI() = getFilePathFor("${typeFileMapping["RAI"]?.first}Java")
 
     val String.withHeader get() = header?.let { "$it$this" } ?: this
 

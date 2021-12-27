@@ -25,14 +25,14 @@ private val arithmeticTypeCombinations = mutableListOf<Triple<KClass<*>, KClass<
     }
 }
 
-private val arithmeticTypeCombinationsMap = arithmeticTypeCombinations
+val arithmeticTypeCombinationsMap = arithmeticTypeCombinations
     .flatMap { listOf((it.first to it.second) to it.third, (it.second to it.first) to it.third) }
     .toMap()
 
 
 
 fun generateArithmeticExtensions(`as`: String, fileName: String, operator: arithmetics.OperatorName): String {
-    val kotlinFile =  FileSpec
+    val kotlinFile = FileSpec
         .builder(packageName, fileName)
         .addAnnotation(AnnotationSpec.builder(Suppress::class).addMember("%S", "UNCHECKED_CAST").build())
     val container = containers[`as`] ?: error("Key `$`as`' not present in $containers")
@@ -73,25 +73,27 @@ private fun generatePlusSameGenericTypes(name: String, operator: String, contain
 private fun generateArithmeticOperatorStarProjection(name: String, operator: String, container: ClassName, jvmName: String): FunSpec {
     val rt = RealType::class.asTypeName().parameterizedBy(STAR)
     val crt = container.parameterizedBy(rt)
+    val error = "error(\"Arithmetic·operator·$operator·($name)·not·supported·for·combination·of·types·${'$'}{this.type::class}·and·${'$'}{that.type::class}.·Use·any·pairwise·combination·of·${'$'}{types.realTypes.map·{·it::class·}}.\")\n"
     val cb = CodeBlock
-            .builder()
-            .add("return when {\n")
-            .also { cb ->
-                for (t1 in arithmeticTypes.map { it.first })
-                    for (t2 in arithmeticTypes.map { it.first }) {
-                        val o = arithmeticTypeCombinationsMap[t1 to t2] ?: run { require(t1 == t2); t1 }
-                        cb.add(
-                            "····this.type·is·%T·&&·that.type·is·%T·->·(this.asType(%T())·$operator·that.asType(%T()))·as·%T\n",
-                            t1,
-                            t2,
-                            o,
-                            o,
-                            crt
-                        )
-                    }
-            }
-            .add("····else·->·error(\"Arithmetic·operator·$operator·($name)·not·supported·for·combination·of·types·${'$'}{this.type::class}·and·${'$'}{that.type::class}.·Use·any·pairwise·combination·of·${'$'}{types.realTypes.map·{·it::class·}}.\")\n")
-            .add("}\n\n")
+        .builder()
+        .add("return ${container.simpleName}Arithmetic${name.capitalize()}ExtensionsJava.$name(this, that) as? %T ?: $error", crt)
+//            .add("return when {\n")
+//            .also { cb ->
+//                for (t1 in arithmeticTypes.map { it.first })
+//                    for (t2 in arithmeticTypes.map { it.first }) {
+//                        val o = arithmeticTypeCombinationsMap[t1 to t2] ?: run { require(t1 == t2); t1 }
+//                        cb.add(
+//                            "····this.type·is·%T·&&·that.type·is·%T·->·(this.asType(%T())·$operator·that.asType(%T()))·as·%T\n",
+//                            t1,
+//                            t2,
+//                            o,
+//                            o,
+//                            crt
+//                        )
+//                    }
+//            }
+//            .add("····else·->·error(\"Arithmetic·operator·$operator·($name)·not·supported·for·combination·of·types·${'$'}{this.type::class}·and·${'$'}{that.type::class}.·Use·any·pairwise·combination·of·${'$'}{types.realTypes.map·{·it::class·}}.\")\n")
+//            .add("}\n\n")
             .build()
 
     return typedFuncSpecBuilder(name, crt)

@@ -16,6 +16,7 @@ open class GenerateArithmeticPlusExtensionsTask : ExtensionsTask("ArithmeticPlus
             Files.write(
                 name.second.toPath(),
                 generateArithmeticExtensions(`as`, name.first, operatorMap["plus"]!!).withHeader.toByteArray())
+            generateArithmeticExtensionsJava(`as`, "${name.first}Java", operatorMap["plus"]!!).writeSourceFile(header)
         }
     }
 
@@ -34,6 +35,7 @@ open class GenerateArithmeticMinusExtensionsTask : ExtensionsTask("ArithmeticMin
             Files.write(
                 name.second.toPath(),
                 generateArithmeticExtensions(`as`, name.first, operatorMap["minus"]!!).withHeader.toByteArray())
+            generateArithmeticExtensionsJava(`as`, "${name.first}Java", operatorMap["minus"]!!).writeSourceFile(header)
         }
     }
 
@@ -52,6 +54,7 @@ open class GenerateArithmeticTimesExtensionsTask : ExtensionsTask("ArithmeticTim
             Files.write(
                 name.second.toPath(),
                 generateArithmeticExtensions(`as`, name.first, operatorMap["times"]!!).withHeader.toByteArray())
+            generateArithmeticExtensionsJava(`as`, "${name.first}Java", operatorMap["times"]!!).writeSourceFile(header)
         }
     }
 
@@ -70,6 +73,7 @@ open class GenerateArithmeticDivExtensionsTask : ExtensionsTask("ArithmeticDiv")
             Files.write(
                 name.second.toPath(),
                 generateArithmeticExtensions(`as`, name.first, operatorMap["div"]!!).withHeader.toByteArray())
+            generateArithmeticExtensionsJava(`as`, "${name.first}Java", operatorMap["div"]!!).writeSourceFile(header)
         }
     }
 
