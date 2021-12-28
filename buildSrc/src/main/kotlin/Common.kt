@@ -41,15 +41,11 @@ val containers = containersClasses.mapValues { it.value.asTypeName() }
 
 val extensionTypes = accessibles.map { it.simpleName!! }
 
-val extensionTypeToAbbreviationMapping = extensionTypes.associateBy({ it }, { it.filter { n -> n.isUpperCase() } })
 val abbreviationToExtensionTypeMapping = extensionTypes.associateBy({ it.filter { n -> n.isUpperCase() } }, { it })
 
 fun getTypeFileMapping(extensionIdentifier: String) = abbreviationToExtensionTypeMapping
         .mapValues { "${it.value}${extensionIdentifier}Extensions" }
         .mapValues { (it.value to outputDir.resolve("${it.value}.kt")) }
-
-fun getTypeClassMappingJava(extensionIdentifier: String) = abbreviationToExtensionTypeMapping
-    .mapValues { "${it.value}${extensionIdentifier}Extensions" }
 
 object arithmetics {
     enum class Operator(val operation: String, val operatorName: String, val type: KClass<*>) {

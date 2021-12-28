@@ -28,21 +28,25 @@
 
 package org.ntakt;
 
-import static org.ntakt.RandomAccessibleArithmeticTimesExtensionsKt.times_1;
 import static org.ntakt.RandomAccessibleConverterExtensionsKt.asType;
+import static org.ntakt.RandomAccessibleConverterExtensionsKt.convert;
 import static org.ntakt.RandomAccessibleExtensionsKt.getType;
 
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.numeric.RealType;
 
 public class RandomAccessibleArithmeticTimesExtensionsJava {
+  public static <T extends net.imglib2.type.Type<T> & net.imglib2.type.operators.Mul<T>> RandomAccessible<T> timesGeneric(
+      final RandomAccessible<T> thiz, final RandomAccessible<T> that) {
+    return convert(thiz, that, getType(thiz), BiConverterTimes.Companion.instance());
+  }
+
   public static RandomAccessible<? extends RealType> times(
       final RandomAccessible<? extends RealType> thiz,
       final RandomAccessible<? extends RealType> that) {
     final RealType rt1 = getType(thiz);
     final RealType rt2 = getType(that);
     final RealType resultType = ArithmeticTypes.ResultType.get(rt1, rt2);
-    return times_1(asType(thiz, resultType), asType(that, resultType));
-
+    return timesGeneric(asType(thiz, resultType), asType(that, resultType));
   }
 }

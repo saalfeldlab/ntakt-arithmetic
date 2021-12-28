@@ -39,7 +39,7 @@ import net.imglib2.RealRandomAccessibleRealInterval as RRARI
 
 @JvmName(name = "div_1")
 operator fun <T> RRARI<T>.div(that: RRARI<T>): RRARI<T> where T : Type<T>, T : Div<T> {
-  return convert(that, type, BiConverterDiv.instance<T>())
+  return RealRandomAccessibleRealIntervalArithmeticDivExtensionsJava.divGeneric(this, that)
 }
 
 @JvmName(name = "div_2")

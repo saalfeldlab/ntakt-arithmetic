@@ -19,7 +19,7 @@ plugins {
     `maven-publish`
 
     // code generation
-    extensions
+    `arithmetic-extensions`
 
     // gradle header plugin
     id("com.github.hierynomus.license") version "0.15.0"

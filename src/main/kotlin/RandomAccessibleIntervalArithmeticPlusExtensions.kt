@@ -42,7 +42,7 @@ operator fun <T : NumericType<T>> RAI<T>.unaryPlus() = this
 
 @JvmName(name = "plus_1")
 operator fun <T> RAI<T>.plus(that: RAI<T>): RAI<T> where T : Type<T>, T : Add<T> {
-  return convert(that, type, BiConverterPlus.instance<T>())
+  return RandomAccessibleIntervalArithmeticPlusExtensionsJava.plusGeneric(this, that)
 }
 
 @JvmName(name = "plus_2")

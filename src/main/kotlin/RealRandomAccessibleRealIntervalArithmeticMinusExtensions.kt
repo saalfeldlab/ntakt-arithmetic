@@ -43,7 +43,7 @@ operator fun <T : NumericType<T>> RRARI<T>.unaryMinus() =
 
 @JvmName(name = "minus_1")
 operator fun <T> RRARI<T>.minus(that: RRARI<T>): RRARI<T> where T : Type<T>, T : Sub<T> {
-  return convert(that, type, BiConverterMinus.instance<T>())
+  return RealRandomAccessibleRealIntervalArithmeticMinusExtensionsJava.minusGeneric(this, that)
 }
 
 @JvmName(name = "minus_2")

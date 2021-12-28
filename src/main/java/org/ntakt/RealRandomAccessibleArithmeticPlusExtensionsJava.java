@@ -28,21 +28,25 @@
 
 package org.ntakt;
 
-import static org.ntakt.RealRandomAccessibleArithmeticPlusExtensionsKt.plus_1;
 import static org.ntakt.RealRandomAccessibleConverterExtensionsKt.asType;
+import static org.ntakt.RealRandomAccessibleConverterExtensionsKt.convert;
 import static org.ntakt.RealRandomAccessibleExtensionsKt.getType;
 
 import net.imglib2.RealRandomAccessible;
 import net.imglib2.type.numeric.RealType;
 
 public class RealRandomAccessibleArithmeticPlusExtensionsJava {
+  public static <T extends net.imglib2.type.Type<T> & net.imglib2.type.operators.Add<T>> RealRandomAccessible<T> plusGeneric(
+      final RealRandomAccessible<T> thiz, final RealRandomAccessible<T> that) {
+    return convert(thiz, that, getType(thiz), BiConverterPlus.Companion.instance());
+  }
+
   public static RealRandomAccessible<? extends RealType> plus(
       final RealRandomAccessible<? extends RealType> thiz,
       final RealRandomAccessible<? extends RealType> that) {
     final RealType rt1 = getType(thiz);
     final RealType rt2 = getType(that);
     final RealType resultType = ArithmeticTypes.ResultType.get(rt1, rt2);
-    return plus_1(asType(thiz, resultType), asType(that, resultType));
-
+    return plusGeneric(asType(thiz, resultType), asType(that, resultType));
   }
 }

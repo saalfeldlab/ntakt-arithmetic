@@ -28,21 +28,25 @@
 
 package org.ntakt;
 
-import static org.ntakt.RandomAccessibleArithmeticDivExtensionsKt.div_1;
 import static org.ntakt.RandomAccessibleConverterExtensionsKt.asType;
+import static org.ntakt.RandomAccessibleConverterExtensionsKt.convert;
 import static org.ntakt.RandomAccessibleExtensionsKt.getType;
 
 import net.imglib2.RandomAccessible;
 import net.imglib2.type.numeric.RealType;
 
 public class RandomAccessibleArithmeticDivExtensionsJava {
+  public static <T extends net.imglib2.type.Type<T> & net.imglib2.type.operators.Div<T>> RandomAccessible<T> divGeneric(
+      final RandomAccessible<T> thiz, final RandomAccessible<T> that) {
+    return convert(thiz, that, getType(thiz), BiConverterDiv.Companion.instance());
+  }
+
   public static RandomAccessible<? extends RealType> div(
       final RandomAccessible<? extends RealType> thiz,
       final RandomAccessible<? extends RealType> that) {
     final RealType rt1 = getType(thiz);
     final RealType rt2 = getType(that);
     final RealType resultType = ArithmeticTypes.ResultType.get(rt1, rt2);
-    return div_1(asType(thiz, resultType), asType(that, resultType));
-
+    return divGeneric(asType(thiz, resultType), asType(that, resultType));
   }
 }

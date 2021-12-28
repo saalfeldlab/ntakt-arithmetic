@@ -39,7 +39,7 @@ import net.imglib2.RandomAccessibleInterval as RAI
 
 @JvmName(name = "div_1")
 operator fun <T> RAI<T>.div(that: RAI<T>): RAI<T> where T : Type<T>, T : Div<T> {
-  return convert(that, type, BiConverterDiv.instance<T>())
+  return RandomAccessibleIntervalArithmeticDivExtensionsJava.divGeneric(this, that)
 }
 
 @JvmName(name = "div_2")

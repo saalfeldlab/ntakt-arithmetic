@@ -28,21 +28,26 @@
 
 package org.ntakt;
 
-import static org.ntakt.RealRandomAccessibleRealIntervalArithmeticPlusExtensionsKt.plus_1;
 import static org.ntakt.RealRandomAccessibleRealIntervalConverterExtensionsKt.asType;
+import static org.ntakt.RealRandomAccessibleRealIntervalConverterExtensionsKt.convert;
 import static org.ntakt.RealRandomAccessibleRealIntervalExtensionsKt.getType;
 
 import net.imglib2.RealRandomAccessibleRealInterval;
 import net.imglib2.type.numeric.RealType;
 
 public class RealRandomAccessibleRealIntervalArithmeticPlusExtensionsJava {
+  public static <T extends net.imglib2.type.Type<T> & net.imglib2.type.operators.Add<T>> RealRandomAccessibleRealInterval<T> plusGeneric(
+      final RealRandomAccessibleRealInterval<T> thiz,
+      final RealRandomAccessibleRealInterval<T> that) {
+    return convert(thiz, that, getType(thiz), BiConverterPlus.Companion.instance());
+  }
+
   public static RealRandomAccessibleRealInterval<? extends RealType> plus(
       final RealRandomAccessibleRealInterval<? extends RealType> thiz,
       final RealRandomAccessibleRealInterval<? extends RealType> that) {
     final RealType rt1 = getType(thiz);
     final RealType rt2 = getType(that);
     final RealType resultType = ArithmeticTypes.ResultType.get(rt1, rt2);
-    return plus_1(asType(thiz, resultType), asType(that, resultType));
-
+    return plusGeneric(asType(thiz, resultType), asType(that, resultType));
   }
 }

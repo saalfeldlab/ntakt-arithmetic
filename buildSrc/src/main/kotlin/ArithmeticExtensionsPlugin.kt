@@ -35,7 +35,7 @@ class ArithmeticExtensionsPlugin : Plugin<Project> {
     private fun <T: Task> TaskContainer.registerExtension(name: String, type: Class<T>) {
         register(name, type)
         this[GenerateAllArithmeticExtensions.name].dependsOn(this[name])
-        this[name].takeIf { it is ArithmeticExtensionsTask }?.let { it as ArithmeticExtensionsTask }?.let { it.header = headerString }
+        this[name].takeIf { it is ExtensionWithHeaderTask }?.let { it as ExtensionWithHeaderTask }?.let { it.header = headerString }
         this[name].takeIf { it is GenerateArithmeticExtensionHelperTask }?.let { it as GenerateArithmeticExtensionHelperTask }?.let { it.header = headerString }
     }
 }

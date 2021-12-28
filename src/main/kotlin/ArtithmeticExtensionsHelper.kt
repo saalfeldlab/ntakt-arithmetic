@@ -29,6 +29,7 @@
 package org.ntakt
 
 import kotlin.String
+import kotlin.jvm.JvmStatic
 import net.imglib2.converter.BiConverter
 import net.imglib2.type.Type
 import net.imglib2.type.numeric.NumericType
@@ -48,6 +49,7 @@ class BiConverterPlus<T> : BiConverter<T, T, T> where T : Add<T>, T : Type<T> {
   }
 
   companion object {
+    @JvmStatic
     fun <T> instance(): BiConverterPlus<T> where T : Add<T>, T : Type<T> {
       return BiConverterPlus<T>()
     }
@@ -65,6 +67,7 @@ class BiConverterMinus<T> : BiConverter<T, T, T> where T : Sub<T>, T : Type<T> {
   }
 
   companion object {
+    @JvmStatic
     fun <T> instance(): BiConverterMinus<T> where T : Sub<T>, T : Type<T> {
       return BiConverterMinus<T>()
     }
@@ -82,6 +85,7 @@ class BiConverterTimes<T> : BiConverter<T, T, T> where T : Mul<T>, T : Type<T> {
   }
 
   companion object {
+    @JvmStatic
     fun <T> instance(): BiConverterTimes<T> where T : Mul<T>, T : Type<T> {
       return BiConverterTimes<T>()
     }
@@ -99,6 +103,7 @@ class BiConverterDiv<T> : BiConverter<T, T, T> where T : Div<T>, T : Type<T> {
   }
 
   companion object {
+    @JvmStatic
     fun <T> instance(): BiConverterDiv<T> where T : Div<T>, T : Type<T> {
       return BiConverterDiv<T>()
     }
@@ -106,6 +111,7 @@ class BiConverterDiv<T> : BiConverter<T, T, T> where T : Div<T>, T : Type<T> {
 }
 
 object ArithmeticConverters {
+  @JvmStatic
   operator fun <T : NumericType<T>> get(operator: String): BiConverter<T, T, T> {
     return when (operator.toLowerCase()) {
       "plus" -> BiConverterPlus.instance<T>()
@@ -116,6 +122,7 @@ object ArithmeticConverters {
     }
   }
 
+  @JvmStatic
   operator fun <T : NumericType<T>> get(operator: String, type: T): BiConverter<T, T, T> =
       get(operator)
 }

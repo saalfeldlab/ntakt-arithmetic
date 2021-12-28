@@ -39,7 +39,7 @@ import net.imglib2.RealRandomAccessible as RRA
 
 @JvmName(name = "div_1")
 operator fun <T> RRA<T>.div(that: RRA<T>): RRA<T> where T : Type<T>, T : Div<T> {
-  return convert(that, type, BiConverterDiv.instance<T>())
+  return RealRandomAccessibleArithmeticDivExtensionsJava.divGeneric(this, that)
 }
 
 @JvmName(name = "div_2")

@@ -39,7 +39,7 @@ import net.imglib2.RandomAccessibleInterval as RAI
 
 @JvmName(name = "times_1")
 operator fun <T> RAI<T>.times(that: RAI<T>): RAI<T> where T : Type<T>, T : Mul<T> {
-  return convert(that, type, BiConverterTimes.instance<T>())
+  return RandomAccessibleIntervalArithmeticTimesExtensionsJava.timesGeneric(this, that)
 }
 
 @JvmName(name = "times_2")

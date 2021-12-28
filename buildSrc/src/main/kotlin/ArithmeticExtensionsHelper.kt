@@ -33,6 +33,7 @@ private fun FileSpec.Builder.makeArithmeticConverterObject(): FileSpec.Builder {
         .objectBuilder("ArithmeticConverters")
         .addFunction(FunSpec
             .builder("get")
+            .addAnnotation(JvmStatic::class)
             .addModifiers(KModifier.OPERATOR)
             .addTypeVariable(genericAndBounded.second)
             .addParameter("operator", String::class)
@@ -41,6 +42,7 @@ private fun FileSpec.Builder.makeArithmeticConverterObject(): FileSpec.Builder {
             .build())
         .addFunction(FunSpec
             .builder("get")
+            .addAnnotation(JvmStatic::class)
             .addModifiers(KModifier.OPERATOR)
             .addTypeVariable(genericAndBounded.second)
             .addParameter("operator", String::class)
@@ -56,7 +58,7 @@ private fun FileSpec.Builder.makeArithmeticBiConverters(): FileSpec.Builder = ar
 }
 
 private fun FileSpec.Builder.makeArithmeticBiConverter(operator: arithmetics.Operator): FileSpec.Builder {
-    val genericAndBounded = operatorGenericAndBoundedMapping[operator.name]!!
+    val genericAndBounded = operatorGenericAndBoundedMapping[operator.operation]!!
     val companion = TypeSpec
         .companionObjectBuilder()
             // TODO is it possible to make an instance of a type with two wildcard parameters?
@@ -66,6 +68,7 @@ private fun FileSpec.Builder.makeArithmeticBiConverter(operator: arithmetics.Ope
 //            .build())
         .addFunction(FunSpec
             .builder("instance")
+            .addAnnotation(JvmStatic::class)
             .addTypeVariable(genericAndBounded.second)
             .addStatement("return·${operator.converterName}<T>()")
             .returns(operator.converterClassName.parameterizedBy(genericAndBounded.first))
@@ -85,7 +88,7 @@ private fun FileSpec.Builder.makeArithmeticBiConverter(operator: arithmetics.Ope
     return this.addType(tSpec.build())
 }
 
-private val operatorInterfaceMapping = mapOf(
+val operatorInterfaceMapping = mapOf(
     "plus" to Add::class,
     "minus" to Sub::class,
     "times" to Mul::class,
@@ -95,6 +98,6 @@ private val operatorGenericAndBoundedMapping = operatorInterfaceMapping.mapValue
 private val operatorStarMapping = operatorInterfaceMapping.mapValues { WildcardTypeName.producerOf(it.value.asTypeName().parameterizedBy(STAR)) }
 
 private val String.converterName get() = "BiConverter${capitalize()}"
-private val arithmetics.Operator.converterName get() = name.converterName
+private val arithmetics.Operator.converterName get() = operation.converterName
 private val arithmetics.Operator.converterClassName get() = ClassName(packageName, converterName)
 private val arithmetics.Operator.converterClassNameStarProducer get() = operatorStarMapping[name.toLowerCase()]!!

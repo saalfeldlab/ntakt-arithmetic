@@ -39,7 +39,7 @@ import net.imglib2.RandomAccessible as RA
 
 @JvmName(name = "times_1")
 operator fun <T> RA<T>.times(that: RA<T>): RA<T> where T : Type<T>, T : Mul<T> {
-  return convert(that, type, BiConverterTimes.instance<T>())
+  return RandomAccessibleArithmeticTimesExtensionsJava.timesGeneric(this, that)
 }
 
 @JvmName(name = "times_2")

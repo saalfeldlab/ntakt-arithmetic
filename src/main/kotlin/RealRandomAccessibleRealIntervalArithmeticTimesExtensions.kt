@@ -39,7 +39,7 @@ import net.imglib2.RealRandomAccessibleRealInterval as RRARI
 
 @JvmName(name = "times_1")
 operator fun <T> RRARI<T>.times(that: RRARI<T>): RRARI<T> where T : Type<T>, T : Mul<T> {
-  return convert(that, type, BiConverterTimes.instance<T>())
+  return RealRandomAccessibleRealIntervalArithmeticTimesExtensionsJava.timesGeneric(this, that)
 }
 
 @JvmName(name = "times_2")
