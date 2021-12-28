@@ -42,6 +42,10 @@ fun generateArithmeticExtensions(`as`: String, fileName: String, operator: arith
     var index = 0
     kotlinFile.addFunction(generatePlusSameGenericTypes(name = name, operator = operatorName, container = container, t = type, jvmName = "${name}_${++index}"))
     kotlinFile.addFunction(generateArithmeticOperatorStarProjection(name, operatorName, container, jvmName = "${name}_${++index}"))
+    for ((t1, t2, o) in arithmeticTypeCombinations) {
+        kotlinFile.addFunction(generatePlusConverting(name, operatorName, container, t1, t2, o, jvmName = "${name}_${++index}"))
+        kotlinFile.addFunction(generatePlusConverting(name, operatorName, container, t2, t1, o, jvmName = "${name}_${++index}"))
+    }
     return StringBuilder().also { sb -> kotlinFile.build().writeTo(sb) }.toString()
 }
 
@@ -68,6 +72,51 @@ private fun generatePlusSameGenericTypes(name: String, operator: String, contain
         .returns(parameterizedContainer)
             .addStatement("return·convert(that,·type,·BiConverter${name.toLowerCase().capitalize()}.instance<T>())")
             .build()
+}
+
+private fun generatePlusConverting(
+    name: String,
+    operator: String,
+    container: KClass<*>,
+    t1: KClass<*>,
+    t2: KClass<*>,
+    o: KClass<*>,
+    jvmName: String): FunSpec {
+    return generatePlusConverting(name, operator, container.asTypeName(), t1, t2, o, jvmName)
+}
+
+private fun generatePlusConverting(
+    name: String,
+    operator: String,
+    container: ClassName,
+    t1: KClass<*>,
+    t2: KClass<*>,
+    o: KClass<*>,
+    jvmName: String): FunSpec {
+    return generatePlusConverting(name, operator, container, t1.asTypeName(), t2.asTypeName(), o.asTypeName(), jvmName)
+}
+
+private fun generatePlusConverting(
+    name: String,
+    operator: String,
+    container: ClassName,
+    t1: ClassName,
+    t2: ClassName,
+    o: ClassName,
+    jvmName: String): FunSpec {
+    val sn = container.simpleName
+    return FunSpec
+        .builder(name)
+        .addAnnotation(AnnotationSpec.builder(JvmName::class).addMember("name = %S", jvmName).build())
+        .addModifiers(KModifier.OPERATOR)
+        .receiver(container.parameterizedBy(t1))
+        .addParameter("that", container.parameterizedBy(t2))
+        .returns(container.parameterizedBy(o))
+        // Need · to add non-breaking space
+//        .addStatement("return·(this·as·%T<RealType<*>>).$name(that as %T<RealType<*>>)·as·%T<${o.simpleName}>", container, container, container)
+//        .addStatement("return this.asType(${o.simpleName}())·$operator·that.asType(${o.simpleName}())")
+        .addStatement("return ${container.simpleName}Arithmetic${name.capitalize()}ExtensionsJava.$name(this, that) as %T", container.parameterizedBy(o))
+        .build()
 }
 
 private fun generateArithmeticOperatorStarProjection(name: String, operator: String, container: ClassName, jvmName: String): FunSpec {
