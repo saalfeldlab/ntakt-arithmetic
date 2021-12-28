@@ -35,36 +35,29 @@ fun generateArithmeticExtensionsJava(`as`: String, className: String, operator: 
 }
 
 fun MethodSpec.Builder.makeArithmeticMethod(container: Class<*>, operator: arithmetics.OperatorName): MethodSpec.Builder {
+    val realTypeClassName = ClassName.get(RealType::class.java)
     val realTypeWildCard = WildcardTypeName.subtypeOf(RealType::class.java)
     val containerClassName = ClassName.get(container)
     val containerSimpleName = container.simpleName
     val parameterizedContainerName = ParameterizedTypeName.get(containerClassName, realTypeWildCard)
     fun makeContainerSpec(name: String) = ParameterSpec.builder(parameterizedContainerName, name, Modifier.FINAL).build()
 
-    addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-    addParameter(makeContainerSpec("thiz"))
-    addParameter(makeContainerSpec("that"))
-    returns(parameterizedContainerName)
+    val thiz = "thiz"
+    val that = "that"
     val getType = "getType" // "${containerSimpleName}ExtensionsKt.getType"
     val asType = "asType" // "${containerSimpleName}ExtensionsKt.asType"
     val operation = "${operator.name}_1" // "${containerSimpleName}Arithmetic${operator.name.capitalize()}ExtensionsKt.${operator.name}"
+
+    addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+    addParameter(makeContainerSpec(thiz))
+    addParameter(makeContainerSpec(that))
+    returns(parameterizedContainerName)
     val codeBlock = CodeBlock
         .builder()
-        .also { cb ->
-            for (t1 in arithmeticTypes.map { it.first })
-                for (t2 in arithmeticTypes.map { it.first }) {
-                    val o = arithmeticTypeCombinationsMap[t1 to t2] ?: run { require(t1 == t2); t1 }
-                    cb.add(
-                        "if ($getType(thiz) instanceof \$T && $getType(that) instanceof \$T) return $operation($asType(thiz, new \$T()), $asType(that, new \$T()));\n",
-                        t1.java,
-                        t2.java,
-                        o.java,
-                        o.java
-                    )
-                }
-            cb.add("return null;")
-        }
-        .add("\n\n")
+        .add("final \$T rt1 = $getType($thiz);\n", realTypeClassName)
+        .add("final \$T rt2 = $getType($that);\n", realTypeClassName)
+        .add("final \$T resultType = ArithmeticTypes.ResultType.get(rt1, rt2);\n", realTypeClassName)
+        .add("return $operation($asType(thiz, resultType), $asType(that, resultType));\n\n")
         .build()
     return this.addCode(codeBlock)
 }

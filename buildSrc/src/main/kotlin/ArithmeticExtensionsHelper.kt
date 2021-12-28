@@ -98,11 +98,3 @@ private val String.converterName get() = "BiConverter${capitalize()}"
 private val arithmetics.OperatorName.converterName get() = name.converterName
 private val arithmetics.OperatorName.converterClassName get() = ClassName(packageName, converterName)
 private val arithmetics.OperatorName.converterClassNameStarProducer get() = operatorStarMapping[name.toLowerCase()]!!
-
-class ArithmeticExtensionsHelper {
-    companion object {
-        @JvmStatic fun main(args: Array<String>) {
-            println(makeArithmeticBiConverters("abc"))
-        }
-    }
-}
