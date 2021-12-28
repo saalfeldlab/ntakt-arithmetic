@@ -51,11 +51,11 @@ private fun FileSpec.Builder.makeArithmeticConverterObject(): FileSpec.Builder {
     return this.addType(obj.build())
 }
 
-private fun FileSpec.Builder.makeArithmeticBiConverters(): FileSpec.Builder = arithmetics.operatorNames.fold(this) { acc, operator ->
+private fun FileSpec.Builder.makeArithmeticBiConverters(): FileSpec.Builder = arithmetics.Operator.values().fold(this) { acc, operator ->
     acc.makeArithmeticBiConverter(operator)
 }
 
-private fun FileSpec.Builder.makeArithmeticBiConverter(operator: arithmetics.OperatorName): FileSpec.Builder {
+private fun FileSpec.Builder.makeArithmeticBiConverter(operator: arithmetics.Operator): FileSpec.Builder {
     val genericAndBounded = operatorGenericAndBoundedMapping[operator.name]!!
     val companion = TypeSpec
         .companionObjectBuilder()
@@ -95,6 +95,6 @@ private val operatorGenericAndBoundedMapping = operatorInterfaceMapping.mapValue
 private val operatorStarMapping = operatorInterfaceMapping.mapValues { WildcardTypeName.producerOf(it.value.asTypeName().parameterizedBy(STAR)) }
 
 private val String.converterName get() = "BiConverter${capitalize()}"
-private val arithmetics.OperatorName.converterName get() = name.converterName
-private val arithmetics.OperatorName.converterClassName get() = ClassName(packageName, converterName)
-private val arithmetics.OperatorName.converterClassNameStarProducer get() = operatorStarMapping[name.toLowerCase()]!!
+private val arithmetics.Operator.converterName get() = name.converterName
+private val arithmetics.Operator.converterClassName get() = ClassName(packageName, converterName)
+private val arithmetics.Operator.converterClassNameStarProducer get() = operatorStarMapping[name.toLowerCase()]!!

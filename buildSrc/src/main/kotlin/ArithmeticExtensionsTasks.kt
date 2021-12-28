@@ -4,90 +4,52 @@ import org.gradle.api.tasks.OutputFile
 import java.io.File
 import java.nio.file.Files
 
-private val operatorMap = arithmetics.operatorNames.map { it.name to it }.toMap()
 
-open class GenerateArithmeticPlusExtensionsTask : ExtensionsTask("ArithmeticPlus") {
+open class GenerateArithmeticPlusExtensionsTask : ArithmeticExtensionsTask(arithmetics.Operator.PLUS) {
 
     @org.gradle.api.tasks.TaskAction
-    fun runTask() {
-        for ((`as`, name) in typeFileMapping) {
-            println("generating arithmetic plus extensions for $`as` ($name)")
-            Files.createDirectories(name.second.parentFile.toPath())
-            Files.write(
-                name.second.toPath(),
-                generateArithmeticExtensions(`as`, name.first, operatorMap["plus"]!!).withHeader.toByteArray())
-            generateArithmeticExtensionsJava(`as`, "${name.first}Java", operatorMap["plus"]!!).writeSourceFile(header)
-        }
-    }
+    override fun runTask() = super.runTask()
 
     companion object {
         const val name = "generateArithmeticPlusExtensions"
     }
 }
 
-open class GenerateArithmeticMinusExtensionsTask : ExtensionsTask("ArithmeticMinus") {
+open class GenerateArithmeticMinusExtensionsTask : ArithmeticExtensionsTask(arithmetics.Operator.MINUS) {
 
     @org.gradle.api.tasks.TaskAction
-    fun runTask() {
-        for ((`as`, name) in typeFileMapping) {
-            println("generating arithmetic minus extensions for $`as` ($name)")
-            Files.createDirectories(name.second.parentFile.toPath())
-            Files.write(
-                name.second.toPath(),
-                generateArithmeticExtensions(`as`, name.first, operatorMap["minus"]!!).withHeader.toByteArray())
-            generateArithmeticExtensionsJava(`as`, "${name.first}Java", operatorMap["minus"]!!).writeSourceFile(header)
-        }
-    }
+    override fun runTask() = super.runTask()
 
     companion object {
         const val name = "generateArithmeticMinusExtensions"
     }
 }
 
-open class GenerateArithmeticTimesExtensionsTask : ExtensionsTask("ArithmeticTimes") {
+open class GenerateArithmeticTimesExtensionsTask : ArithmeticExtensionsTask(arithmetics.Operator.TIMES) {
 
     @org.gradle.api.tasks.TaskAction
-    fun runTask() {
-        for ((`as`, name) in typeFileMapping) {
-            println("generating arithmetic times extensions for $`as` ($name)")
-            Files.createDirectories(name.second.parentFile.toPath())
-            Files.write(
-                name.second.toPath(),
-                generateArithmeticExtensions(`as`, name.first, operatorMap["times"]!!).withHeader.toByteArray())
-            generateArithmeticExtensionsJava(`as`, "${name.first}Java", operatorMap["times"]!!).writeSourceFile(header)
-        }
-    }
+    override fun runTask() = super.runTask()
 
     companion object {
         const val name = "generateArithmeticTimesExtensions"
     }
 }
 
-open class GenerateArithmeticDivExtensionsTask : ExtensionsTask("ArithmeticDiv") {
+open class GenerateArithmeticDivExtensionsTask : ArithmeticExtensionsTask(arithmetics.Operator.DIV) {
 
     @org.gradle.api.tasks.TaskAction
-    fun runTask() {
-        for ((`as`, name) in typeFileMapping) {
-            println("generating arithmetic plus extensions for $`as` ($name)")
-            Files.createDirectories(name.second.parentFile.toPath())
-            Files.write(
-                name.second.toPath(),
-                generateArithmeticExtensions(`as`, name.first, operatorMap["div"]!!).withHeader.toByteArray())
-            generateArithmeticExtensionsJava(`as`, "${name.first}Java", operatorMap["div"]!!).writeSourceFile(header)
-        }
-    }
+    override fun runTask() = super.runTask()
 
     companion object {
         const val name = "generateArithmeticDivExtensions"
     }
 }
 
-open class GenerateArithmeticScalarExtensionsTask : ExtensionsTask("ArithmeticScalar") {
+open class GenerateArithmeticScalarExtensionsTask : ExtensionWithHeaderTask("ArithmeticScalar") {
 
     @org.gradle.api.tasks.TaskAction
     fun runTask() {
-        for ((`as`, name) in typeFileMapping) {
-            println("generating arithmetic scalar extensions for $`as` ($name)")
+        for ((`as`, name) in getTypeFileMapping("ArithmeticScalar")) {
             Files.write(name.second.toPath(), generateArithmeticScalarExtensions(`as`, name.first).withHeader.toByteArray())
         }
     }
@@ -101,7 +63,7 @@ open class GenerateArithmeticScalarExtensionsTask : ExtensionsTask("ArithmeticSc
 open class GenerateArithmeticExtensionHelperTask : DefaultTask() {
 
     init {
-        group = ExtensionsTask.group
+        group = ArithmeticExtensionsTask.group
     }
 
     @Input

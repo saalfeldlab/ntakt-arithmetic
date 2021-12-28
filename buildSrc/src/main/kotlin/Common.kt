@@ -15,31 +15,6 @@ import kotlin.reflect.KClass
 
 val packageName = "org.ntakt"
 
-object identifiers {
-    const val complex = "complex"
-    const val real = "real"
-    const val signedInteger = "signedInteger"
-    const val unsignedInteger = "unsignedInteger"
-}
-
-val arithmeticTypes = with (identifiers) {
-    arrayOf<Pair<KClass<*>, String>>(
-            // TOOD complex types not implemented yet
-//            ComplexDoubleType::class to complex,
-//            ComplexFloatType::class to complex,
-            DoubleType::class to real,
-            FloatType::class to real,
-            LongType::class to signedInteger,
-            IntType::class to signedInteger,
-            ShortType::class to signedInteger,
-            ByteType::class to signedInteger,
-            UnsignedLongType::class to unsignedInteger,
-            UnsignedIntType::class to unsignedInteger,
-            UnsignedShortType::class to unsignedInteger,
-            UnsignedByteType::class to unsignedInteger
-    )
-}
-
 val primitiveTypes = arrayOf(
         Byte::class,
         Short::class,
@@ -52,31 +27,22 @@ val primitiveTypes = arrayOf(
 val outputDir = File("src/main/kotlin")
 val outputDirJava = File("src/main/java")
 
-val containersClasses = mapOf(
-    "RA" to RandomAccessible::class,
-    "RAI" to RandomAccessibleInterval::class,
-    "RRA" to RealRandomAccessible::class,
-    "RRARI" to RealRandomAccessibleRealInterval::class
-//        "II" to IterableInterval::class.asTypeName())
+val accessibles = listOf(
+    RandomAccessible::class,
+    RandomAccessibleInterval::class,
+    RealRandomAccessible::class,
+    RealRandomAccessibleRealInterval::class
+//    IterableInterval::class
 )
 
-val containers = mapOf(
-        "RA" to RandomAccessible::class.asTypeName(),
-        "RAI" to RandomAccessibleInterval::class.asTypeName(),
-        "RRA" to RealRandomAccessible::class.asTypeName(),
-        "RRARI" to RealRandomAccessibleRealInterval::class.asTypeName()
-//        "II" to IterableInterval::class.asTypeName())
-)
+val containersClasses = accessibles.associateBy { it.simpleName!!.filter { n -> n.isUpperCase() } }
 
-val extensionTypes = arrayOf(
-        "RandomAccessible",
-        "RandomAccessibleInterval",
-        "RealRandomAccessible",
-        "RealRandomAccessibleRealInterval"
-//        "IterableInterval"
-)
-val extensionTypeToAbbreviationMapping = extensionTypes.associateBy({ it }, { it.filter { it.isUpperCase() } })
-val abbreviationToExtensionTypeMapping = extensionTypes.associateBy({ it.filter { it.isUpperCase() } }, { it })
+val containers = containersClasses.mapValues { it.value.asTypeName() }
+
+val extensionTypes = accessibles.map { it.simpleName!! }
+
+val extensionTypeToAbbreviationMapping = extensionTypes.associateBy({ it }, { it.filter { n -> n.isUpperCase() } })
+val abbreviationToExtensionTypeMapping = extensionTypes.associateBy({ it.filter { n -> n.isUpperCase() } }, { it })
 
 fun getTypeFileMapping(extensionIdentifier: String) = abbreviationToExtensionTypeMapping
         .mapValues { "${it.value}${extensionIdentifier}Extensions" }
@@ -86,13 +52,16 @@ fun getTypeClassMappingJava(extensionIdentifier: String) = abbreviationToExtensi
     .mapValues { "${it.value}${extensionIdentifier}Extensions" }
 
 object arithmetics {
-    data class OperatorName(val name: String, val operatorName: String, val type: KClass<*>)
+    enum class Operator(val operation: String, val operatorName: String, val type: KClass<*>) {
+        PLUS("plus", "+", Add::class),
+        MINUS("minus", "-", Sub::class),
+        TIMES("times", "*", Mul::class),
+        DIV("div", "/", Div::class);
 
-    val operatorNames = arrayOf(
-            OperatorName("plus", "+", Add::class),
-            OperatorName("minus", "-", Sub::class),
-            OperatorName("times", "*", Mul::class),
-            OperatorName("div", "/", Div::class))
+        operator fun component1() = operation
+        operator fun component2() = operatorName
+        operator fun component3() = type
+    }
 }
 
 fun TypeVariableName.recursiveGeneric(vararg type: KClass<*>) = recursiveGeneric(*type.map { it.asTypeName() }.toTypedArray())

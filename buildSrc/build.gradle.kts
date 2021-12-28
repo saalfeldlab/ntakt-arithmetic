@@ -4,9 +4,9 @@ plugins {
 
 gradlePlugin {
     plugins {
-        register("extensions-plugin") {
-            id = "extensions"
-            implementationClass = "ExtensionsPlugin"
+        register("arithmetic-extensions-plugin") {
+            id = "arithmetic-extensions"
+            implementationClass = "ArithmeticExtensionsPlugin"
         }
     }
 }

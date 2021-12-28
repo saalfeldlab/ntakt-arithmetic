@@ -6,9 +6,9 @@ import kotlin.reflect.KClass
 fun generateArithmeticScalarExtensions(`as`: String, fileName: String): String {
     val kotlinFile =  FileSpec.builder("org.ntakt", fileName)
     val container = containers[`as`] ?: error("Key `$`as`' not present in $containers")
-    for ((name, operatorName, type) in arithmetics.operatorNames) {
-        kotlinFile.addFunction(generateArithmeticScalarOperatorSameType(name, operatorName, container, type))
-        kotlinFile.addArithmeticScalarOperatorsPrimitiveTypes(name, operatorName, container)
+    for ((operation, operatorName, type) in arithmetics.Operator.values()) {
+        kotlinFile.addFunction(generateArithmeticScalarOperatorSameType(operation, operatorName, container, type))
+        kotlinFile.addArithmeticScalarOperatorsPrimitiveTypes(operation, operatorName, container)
     }
     kotlinFile.addPow(container)
     kotlinFile.addExp(container)

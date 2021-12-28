@@ -11,7 +11,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class ExtensionsPlugin : Plugin<Project> {
+class ArithmeticExtensionsPlugin : Plugin<Project> {
 
     private val licenseFilePath = Paths.get("LICENSE")
     private var licenseString: String? = if (Files.exists(licenseFilePath)) Files.readAllLines(licenseFilePath).joinToString("\n") else null
@@ -22,8 +22,8 @@ class ExtensionsPlugin : Plugin<Project> {
 
 
     override fun apply(project: Project): Unit = project.run {
-        tasks.register(GenerateAllExtensions.name, GenerateAllExtensions::class.java)
-        tasks["compileKotlin"].dependsOn(tasks[GenerateAllExtensions.name])
+        tasks.register(GenerateAllArithmeticExtensions.name, GenerateAllArithmeticExtensions::class.java)
+        tasks["compileKotlin"].dependsOn(tasks[GenerateAllArithmeticExtensions.name])
         tasks.registerExtension(GenerateArithmeticPlusExtensionsTask.name, GenerateArithmeticPlusExtensionsTask::class.java)
         tasks.registerExtension(GenerateArithmeticMinusExtensionsTask.name, GenerateArithmeticMinusExtensionsTask::class.java)
         tasks.registerExtension(GenerateArithmeticTimesExtensionsTask.name, GenerateArithmeticTimesExtensionsTask::class.java)
@@ -34,31 +34,29 @@ class ExtensionsPlugin : Plugin<Project> {
 
     private fun <T: Task> TaskContainer.registerExtension(name: String, type: Class<T>) {
         register(name, type)
-        this[GenerateAllExtensions.name].dependsOn(this[name])
-        this[name].takeIf { it is ExtensionsTask }?.let { it as ExtensionsTask }?.let { it.header = headerString }
+        this[GenerateAllArithmeticExtensions.name].dependsOn(this[name])
+        this[name].takeIf { it is ArithmeticExtensionsTask }?.let { it as ArithmeticExtensionsTask }?.let { it.header = headerString }
         this[name].takeIf { it is GenerateArithmeticExtensionHelperTask }?.let { it as GenerateArithmeticExtensionHelperTask }?.let { it.header = headerString }
     }
 }
 
-private open class GenerateAllExtensions : DefaultTask() {
+private open class GenerateAllArithmeticExtensions : DefaultTask() {
 
     init {
-        group = ExtensionsTask.group
+        group = ArithmeticExtensionsTask.group
     }
 
     companion object {
-        const val name = "generateAllExtensions"
+        const val name = "generateAllArithmeticExtensions"
     }
 }
 
-open class ExtensionsTask(extensionsIdentifier: String) : AbstractTask() {
-
-    init {
-        group = Companion.group
-    }
-
+open class ExtensionWithHeaderTask(extensionsIdentifier: String) : AbstractTask() {
     @Input
     var header: String? = null
+
+    @Input
+    protected val typeFileMapping: Map<String, Pair<String, File>> = getTypeFileMapping(extensionsIdentifier)
 
     // Why do we need to annotate this? Build fails without this annotation:
     // * What went wrong:
@@ -67,8 +65,6 @@ open class ExtensionsTask(extensionsIdentifier: String) : AbstractTask() {
     //   > Warning: Type 'ExtensionsTask': property 'typeFileMapping' is not annotated with an input or output annotation.
     //   > Warning: Type 'GenerateArithmeticExtensionsTask': property 'typeFileMapping' is not annotated with an input or output annotation.
     //   > Warning: Type 'GenerateConverterExtensionsTask': property 'typeFileMapping' is not annotated with an input or output annotation.
-    @Input
-    protected val typeFileMapping: Map<String, Pair<String, File>> = getTypeFileMapping(extensionsIdentifier)
     // this annotation has to be on a fun, not a val
     // https://docs.gradle.org/current/userguide/custom_plugins.html#sec:working_with_files_in_custom_tasks_and_plugins
     @OutputFile
@@ -81,10 +77,29 @@ open class ExtensionsTask(extensionsIdentifier: String) : AbstractTask() {
     fun getJavaFileRAI() = getFilePathFor("${typeFileMapping["RAI"]?.first}Java")
 
     val String.withHeader get() = header?.let { "$it$this" } ?: this
+}
+
+open class ArithmeticExtensionsTask(private val operator: arithmetics.Operator) : ExtensionWithHeaderTask("$arithmetic${operator.operation.capitalize()}") {
+
+    init {
+        group = Companion.group
+    }
+
+    open fun runTask() {
+        for ((`as`, name) in typeFileMapping) {
+            println("generating arithmetic plus extensions for $`as` ($name)")
+            Files.createDirectories(name.second.parentFile.toPath())
+            Files.write(
+                name.second.toPath(),
+                generateArithmeticExtensions(`as`, name.first, operator).withHeader.toByteArray())
+            generateArithmeticExtensionsJava(`as`, "${name.first}Java", operator).writeSourceFile(header)
+        }
+    }
 
 
     companion object {
         const val group = "ntakt extensions"
+        private const val arithmetic = "Arithmetic"
     }
 
 }

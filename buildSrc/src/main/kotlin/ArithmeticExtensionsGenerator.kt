@@ -8,13 +8,13 @@ import kotlin.reflect.KClass
 
 
 
-fun generateArithmeticExtensions(`as`: String, fileName: String, operator: arithmetics.OperatorName): String {
+fun generateArithmeticExtensions(`as`: String, fileName: String, operator: arithmetics.Operator): String {
     val kotlinFile = FileSpec
         .builder(packageName, fileName)
         .addAnnotation(AnnotationSpec.builder(Suppress::class).addMember("%S", "UNCHECKED_CAST").build())
     val container = containers[`as`] ?: error("Key `$`as`' not present in $containers")
     kotlinFile.addAliasedImport(container, `as`)
-    kotlinFile.addUnaryPlusMinus(container, operator.name)
+    kotlinFile.addUnaryPlusMinus(container, operator.operation)
     val (name, operatorName, type) = operator
     var index = 0
     kotlinFile.addFunction(generatePlusSameGenericTypes(name = name, operator = operatorName, container = container, t = type, jvmName = "${name}_${++index}"))

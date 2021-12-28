@@ -5,7 +5,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import javax.lang.model.element.Modifier
 
-fun generateArithmeticExtensionsJava(`as`: String, className: String, operator: arithmetics.OperatorName): JavaFile {
+fun generateArithmeticExtensionsJava(`as`: String, className: String, operator: arithmetics.Operator): JavaFile {
     val container = containersClasses[`as`] ?: error("Key `$`as`' not present in $containersClasses")
     val containerSimpleName = container.java.simpleName
 
@@ -25,16 +25,9 @@ fun generateArithmeticExtensionsJava(`as`: String, className: String, operator: 
         .addStaticImport(ClassName.get(packageName, "${containerSimpleName}ConverterExtensionsKt"), "asType")
         .addStaticImport(ClassName.get(packageName, "${containerSimpleName}Arithmetic${operator.name.capitalize()}ExtensionsKt"), "${operator.name}_1")
         .build()
-//    kotlinFile.addAliasedImport(container, `as`)
-//    kotlinFile.addUnaryPlusMinus(container, operator.name)
-//    val (name, operatorName, type) = operator
-//    var index = 0
-//    kotlinFile.addFunction(generatePlusSameGenericTypes(name = name, operator = operatorName, container = container, t = type, jvmName = "${name}_${++index}"))
-//    kotlinFile.addFunction(generateArithmeticOperatorStarProjection(name, operatorName, container, jvmName = "${name}_${++index}"))
-//    return StringBuilder().also { sb -> kotlinFile.build().writeTo(sb) }.toString()
 }
 
-fun MethodSpec.Builder.makeArithmeticMethod(container: Class<*>, operator: arithmetics.OperatorName): MethodSpec.Builder {
+fun MethodSpec.Builder.makeArithmeticMethod(container: Class<*>, operator: arithmetics.Operator): MethodSpec.Builder {
     val realTypeClassName = ClassName.get(RealType::class.java)
     val realTypeWildCard = WildcardTypeName.subtypeOf(RealType::class.java)
     val containerClassName = ClassName.get(container)
@@ -44,9 +37,9 @@ fun MethodSpec.Builder.makeArithmeticMethod(container: Class<*>, operator: arith
 
     val thiz = "thiz"
     val that = "that"
-    val getType = "getType" // "${containerSimpleName}ExtensionsKt.getType"
-    val asType = "asType" // "${containerSimpleName}ExtensionsKt.asType"
-    val operation = "${operator.name}_1" // "${containerSimpleName}Arithmetic${operator.name.capitalize()}ExtensionsKt.${operator.name}"
+    val getType = "getType"
+    val asType = "asType"
+    val operation = "${operator.operation}_1"
 
     addModifiers(Modifier.PUBLIC, Modifier.STATIC)
     addParameter(makeContainerSpec(thiz))
